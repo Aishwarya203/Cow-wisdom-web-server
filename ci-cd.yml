@@ -1,0 +1,30 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+      
+    - name: Login to Container Registry
+      uses: docker/login-action@v1
+      with:
+        username: ${{ secrets.mydockeruser }} 
+        password: ${{ secrets.mypassword123 }}  
+        
+    - name: Build Docker image
+      run: docker build -t mydockerhubusername/wisecow-app:latest .  # Replace with your Docker Hub username
+      
+    - name: Push Docker image
+      run: docker push mydockerhubusername/wisecow-app:latest  # Replace with your Docker Hub username
+      
+    - name: Deploy to Kubernetes
+      run: kubectl apply -f wisecow-deployment.yaml
+      env:
+        KUBECONFIG: ${{ secrets.KUBE_CONFIG_DATA }}  # Your Kubernetes config data
